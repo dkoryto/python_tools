@@ -1,24 +1,16 @@
-import subprocess
+try:
+    import requests
+except ImportError:
+    install_package('requests')
+    import requests
 
-def install_package(package):
-    try:
-        subprocess.check_call(["python3", "-m", "pip", "install", package])
-    except subprocess.CalledProcessError as e:
-        print(f"Failed to install package {package}: {str(e)}")
+try:
+    from bs4 import BeautifulSoup
+except ImportError:
+    install_package('beautifulsoup4')
+    from bs4 import BeautifulSoup
 
 def extract_links(url):
-    try:
-        import requests
-    except ImportError:
-        install_package('requests')
-        import requests
-
-    try:
-        from bs4 import BeautifulSoup
-    except ImportError:
-        install_package('beautifulsoup4')
-        from bs4 import BeautifulSoup
-
     try:
         response = requests.get(url)
         response.raise_for_status()
@@ -26,8 +18,8 @@ def extract_links(url):
         soup = BeautifulSoup(response.content, 'html.parser')
         links = soup.find_all('a', href=True)
 
-        # Filtrowanie linków zawierających 'dl[1-9].downloadly.ir' oraz kończących się na .rar lub .zip
-        filtered_links = [link['href'] for link in links if any(f'dl{i}.downloadly.ir' in link['href'] for i in range(1, 10)) and (link['href'].endswith('.rar') or link['href'].endswith('.zip'))]
+        # Filtrowanie linków zawierających 'dl.downloadly.ir' oraz kończących się na .rar lub .zip
+        filtered_links = [link['href'] for link in links if 'dl.downloadly.ir' in link['href'] and (link['href'].endswith('.rar') or link['href'].endswith('.zip'))]
 
         return filtered_links
     except requests.RequestException as e:
